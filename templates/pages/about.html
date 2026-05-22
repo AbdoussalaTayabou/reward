@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}À propos — Rewards{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-16">
+  <span class="text-brand-600 font-semibold text-sm uppercase tracking-wide">À propos</span>
+  <h1 class="mt-2 text-4xl md:text-5xl font-extrabold">Notre mission : un web qui vous rémunère.</h1>
+  <p class="mt-5 text-lg text-slate-600">Rewards est née d'un constat simple : votre attention et vos données ont une valeur, mais c'est rarement vous qui en bénéficiez. Nous reversons jusqu'à 90 % de ce que nos partenaires nous paient, en toute transparence.</p>
+
+  <div class="mt-12 grid md:grid-cols-3 gap-6">
+    {% for t,d in [('Transparence','Chaque point gagné est tracé. Vous voyez d\'où il vient et ce qu\'il vaut, à l\'euro près.'),('Sécurité','Vos données sont chiffrées, jamais revendues. Conformité RGPD complète.'),('Communauté','Une équipe joignable, un support sous 48 h, des évolutions guidées par vos retours.')] %}
+    <div class="p-6 rounded-2xl border border-slate-200">
+      <h3 class="font-bold text-lg">{{ t }}</h3>
+      <p class="mt-2 text-sm text-slate-600">{{ d }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="mt-16 text-2xl font-extrabold">Notre histoire</h2>
+  <p class="mt-3 text-slate-600">Lancée en 2024 par une équipe de développeurs indépendants, Rewards a déjà reversé plus de 320 000 € à sa communauté. Nous restons une structure légère et indépendante, sans levée de fonds, pour garder une seule priorité : vous.</p>
+
+  <h2 class="mt-12 text-2xl font-extrabold">Nos engagements</h2>
+  <ul class="mt-3 space-y-2 text-slate-700 list-disc list-inside">
+    <li>Aucun frais caché, aucun abonnement.</li>
+    <li>Paiements traités sous 48 h ouvrées.</li>
+    <li>Aucune revente de vos données personnelles.</li>
+    <li>Support humain par email à <a href="mailto:contact@rewards.app" class="text-brand-700 underline">contact@rewards.app</a>.</li>
+  </ul>
+</section>
+{% endblock %}

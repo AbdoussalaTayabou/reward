@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Profil{% endblock %}
+{% block content %}
+<a href="{{ url_for('dashboard.home') }}" class="text-sm text-slate-500 hover:underline">← Mon espace</a>
+<h1 class="text-2xl font-bold my-4">Profil</h1>
+
+<div class="bg-white border rounded p-6 max-w-lg space-y-4">
+  <div>
+    <div class="text-sm text-slate-500">Email du compte</div>
+    <div class="font-medium">{{ current_user.email }}</div>
+  </div>
+
+  <div>
+    <div class="text-sm text-slate-500">Code de parrainage</div>
+    <div class="font-mono">{{ current_user.referral_code }}</div>
+  </div>
+
+  <form method="post" class="pt-2 border-t">
+    <label class="block mb-2">
+      <span class="text-sm font-medium">Email PayPal (pour recevoir les retraits)</span>
+      <input type="email" name="paypal_email"
+             value="{{ current_user.paypal_email or '' }}"
+             placeholder="moi@paypal.com"
+             class="mt-1 w-full border rounded px-3 py-2">
+    </label>
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+      Enregistrer
+    </button>
+  </form>
+</div>
+{% endblock %}

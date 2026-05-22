@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Offerwall TimeWall{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Offerwall — TimeWall</h1>
+
+{% if not configured %}
+  <div class="p-4 bg-yellow-50 border border-yellow-300 rounded text-yellow-900">
+    TimeWall n'est pas encore configuré. Définis <code>TIMEWALL_APP_KEY</code> et
+    <code>TIMEWALL_SECRET</code> dans ton fichier <code>.env</code>.
+  </div>
+{% else %}
+  <p class="text-slate-600 mb-3">
+    Complète des offres et tes points sont crédités automatiquement (jusqu'à quelques minutes
+    de délai).
+  </p>
+  <div class="rounded-lg overflow-hidden border bg-white shadow-sm">
+    <iframe
+      src="{{ iframe_url }}"
+      style="width:100%;height:850px;border:0;"
+      scrolling="yes"
+      allow="clipboard-write"
+      referrerpolicy="no-referrer-when-downgrade"
+      title="TimeWall offerwall"></iframe>
+  </div>
+{% endif %}
+{% endblock %}

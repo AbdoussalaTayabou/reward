@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Rewards — Gagne des récompenses en ligne{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Rewards : gagne de l'argent et des cartes cadeaux en répondant à des sondages, regardant des vidéos et accomplissant des micro-tâches. Inscription gratuite.{% endblock %}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { brand: { 50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3' } } } } }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Inter', system-ui, sans-serif; } </style>
+</head>
+<body class="bg-white text-slate-900 min-h-screen flex flex-col">
+
+<header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="{{ url_for('index') }}" class="flex items-center gap-2 font-extrabold text-lg">
+      <span class="inline-flex w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-white items-center justify-center">R</span>
+      <span>Rewards</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-6 text-sm">
+      {# --- Mega-menu Gagner : liste dynamique depuis le registry --- #}
+      <div class="relative group">
+        <button class="text-slate-700 hover:text-brand-700 inline-flex items-center gap-1 py-2">
+          Gagner
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="absolute left-0 top-full hidden group-hover:block pt-1 z-50">
+          <div class="w-[30rem] bg-white border border-slate-200 rounded-xl shadow-xl p-4 grid grid-cols-2 gap-2">
+            {% for p in nav_platforms %}
+              <a href="{% if p.internal %}{{ url_for(p.endpoint) }}{% else %}{{ url_for('platforms.go', slug=p.slug) }}{% endif %}"
+                 class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50">
+                <span class="w-9 h-9 rounded-lg bg-gradient-to-br {{ p.color }} text-white flex items-center justify-center text-lg">{{ p.icon }}</span>
+                <span>
+                  <span class="block text-sm font-semibold text-slate-800">{{ p.name }}</span>
+                  <span class="block text-xs text-slate-500 line-clamp-1">{{ p.description }}</span>
+                </span>
+              </a>
+            {% endfor %}
+            <a href="{{ url_for('platforms.hub') }}" class="col-span-2 mt-1 text-center text-sm font-semibold text-brand-700 py-2 rounded-lg bg-brand-50 hover:bg-brand-100">Voir tout le hub →</a>
+          </div>
+        </div>
+      </div>
+      <a href="{{ url_for('pages.how_it_works') }}" class="text-slate-700 hover:text-brand-700">Comment ça marche</a>
+      <a href="{{ url_for('pages.rewards') }}" class="text-slate-700 hover:text-brand-700">Récompenses</a>
+      <a href="{{ url_for('pages.faq') }}" class="text-slate-700 hover:text-brand-700">FAQ</a>
+      <a href="{{ url_for('pages.contact') }}" class="text-slate-700 hover:text-brand-700">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3 text-sm">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard.home') }}" class="text-slate-700 hover:text-brand-700">Mon espace</a>
+        <a href="{{ url_for('dashboard.home') }}" class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 font-semibold">{{ current_user.points_balance }} pts</a>
+        {% if current_user.is_admin %}
+          <a href="{{ url_for('admin.dashboard') }}" class="text-brand-700 font-semibold">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" class="text-slate-600 hover:text-brand-700">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="text-slate-700 hover:text-brand-700">Connexion</a>
+        <a href="{{ url_for('auth.signup') }}" class="bg-brand-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-brand-700 shadow-sm">Commencer gratuitement</a>
+      {% endif %}
+    </div>
+
+    <button id="navToggle" class="md:hidden p-2 rounded-md hover:bg-slate-100" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+
+  <div id="mobileNav" class="hidden md:hidden border-t border-slate-200 bg-white">
+    <div class="px-4 py-3 flex flex-col gap-1 text-sm">
+      <div class="text-xs uppercase tracking-wide text-slate-400 mt-1">Gagner</div>
+      {% for p in nav_platforms %}
+        <a href="{% if p.internal %}{{ url_for(p.endpoint) }}{% else %}{{ url_for('platforms.go', slug=p.slug) }}{% endif %}"
+           class="py-1.5 flex items-center gap-2">
+          <span>{{ p.icon }}</span><span>{{ p.name }}</span>
+        </a>
+      {% endfor %}
+      <a href="{{ url_for('platforms.hub') }}" class="py-1.5 text-brand-700 font-semibold">→ Tout le hub</a>
+      <hr class="my-2">
+      <a href="{{ url_for('pages.how_it_works') }}" class="py-1.5">Comment ça marche</a>
+      <a href="{{ url_for('pages.rewards') }}" class="py-1.5">Récompenses</a>
+      <a href="{{ url_for('pages.faq') }}" class="py-1.5">FAQ</a>
+      <a href="{{ url_for('pages.contact') }}" class="py-1.5">Contact</a>
+      <hr class="my-2">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard.home') }}" class="py-1.5">Mon espace ({{ current_user.points_balance }} pts)</a>
+        {% if current_user.is_admin %}<a href="{{ url_for('admin.dashboard') }}" class="py-1.5 text-brand-700 font-semibold">Admin</a>{% endif %}
+        <a href="{{ url_for('auth.logout') }}" class="py-1.5">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="py-1.5">Connexion</a>
+        <a href="{{ url_for('auth.signup') }}" class="py-2 px-3 rounded-lg bg-brand-600 text-white font-semibold text-center">Commencer gratuitement</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main class="flex-1">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="max-w-6xl mx-auto px-4 pt-6">
+        {% for cat, msg in messages %}
+          <div class="mb-3 p-3 rounded-lg border text-sm
+            {% if cat == 'danger' %}bg-red-50 border-red-200 text-red-800
+            {% elif cat == 'success' %}bg-green-50 border-green-200 text-green-800
+            {% else %}bg-slate-50 border-slate-200 text-slate-800{% endif %}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% include 'partials/footer.html' %}
+
+<script>
+  document.getElementById('navToggle')?.addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('hidden');
+  });
+</script>
+</body>
+</html>

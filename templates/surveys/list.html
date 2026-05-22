@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Sondages disponibles</h1>
+
+{% if available %}
+  <div class="grid gap-4 md:grid-cols-2">
+    {% for s in available %}
+      <a href="{{ url_for('surveys.take_survey', survey_id=s.id) }}"
+         class="block border rounded-lg p-4 hover:shadow">
+        <h2 class="font-semibold text-lg">{{ s.title }}</h2>
+        <p class="text-sm text-gray-600">{{ s.description or '' }}</p>
+        <p class="mt-2 text-green-600 font-bold">+{{ s.points_reward }} pts</p>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-gray-500">Aucun sondage disponible pour le moment.</p>
+{% endif %}
+
+{% if done %}
+  <h2 class="text-xl font-semibold mt-10 mb-4">Déjà complétés</h2>
+  <ul class="list-disc pl-5 text-gray-600">
+    {% for s in done %}<li>{{ s.title }}</li>{% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

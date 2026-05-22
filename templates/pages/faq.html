@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}FAQ — Rewards{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-16">
+  <span class="text-brand-600 font-semibold text-sm uppercase tracking-wide">Questions fréquentes</span>
+  <h1 class="mt-2 text-4xl md:text-5xl font-extrabold">FAQ</h1>
+  <p class="mt-5 text-lg text-slate-600">Toutes les réponses aux questions les plus courantes. Vous ne trouvez pas ? <a class="text-brand-700 underline" href="{{ url_for('pages.contact') }}">Contactez-nous</a>.</p>
+
+  <div class="mt-10 space-y-3">
+    {% for q,a in [
+      ('Rewards est-il vraiment gratuit ?','Oui, 100 %. Aucune carte bancaire, aucun abonnement. Vous ne payez jamais rien.'),
+      ('Comment êtes-vous rémunérés ?','Nos partenaires (annonceurs, instituts de sondage, éditeurs d\'apps) nous paient pour vous proposer leurs offres. Nous reversons jusqu\'à 90 % à nos membres.'),
+      ('À partir de quel âge puis-je m\'inscrire ?','15 ans minimum, avec accord parental jusqu\'à 18 ans. Un seul compte par personne.'),
+      ('Combien puis-je gagner par mois ?','En moyenne entre 20 € et 80 € selon votre temps disponible. Certains membres très actifs dépassent 200 €.'),
+      ('Quel est le délai de paiement ?','48 h ouvrées maximum. La plupart des retraits PayPal sont traités sous 24 h.'),
+      ('Mes données sont-elles vendues ?','Non. Vos données personnelles ne sont jamais revendues. Nous sommes conformes RGPD.'),
+      ('Combien valent les points ?','1 000 points = 1 €. C\'est fixe et garanti.'),
+      ('Y a-t-il un seuil minimum ?','Oui, 5 € (soit 5 000 points) pour la majorité des récompenses.'),
+      ('Comment fonctionne le parrainage ?','Partagez votre code unique. Quand votre filleul atteint son premier gain, vous recevez 500 pts et lui aussi.'),
+      ('Puis-je supprimer mon compte ?','Oui, à tout moment depuis votre espace ou par simple email à contact@rewards.app.'),
+      ('Que se passe-t-il si une tâche est refusée ?','Vos points ne sont pas débités, et un email vous explique la raison. Vous pouvez resoumettre.'),
+      ('Pourquoi mon retrait est-il en attente ?','Tous les retraits passent par une validation humaine anti-fraude. Comptez 48 h max.'),
+    ] %}
+    <details class="group border border-slate-200 rounded-xl p-5 open:border-brand-300 open:bg-brand-50/30">
+      <summary class="cursor-pointer font-semibold flex items-center justify-between">
+        {{ q }}
+        <span class="ml-3 text-brand-600 group-open:rotate-45 transition">+</span>
+      </summary>
+      <p class="mt-3 text-slate-600 text-sm">{{ a }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

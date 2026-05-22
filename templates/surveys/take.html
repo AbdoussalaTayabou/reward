@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">{{ survey.title }}</h1>
+<p class="text-gray-600 mb-6">{{ survey.description or '' }}</p>
+
+<form method="post" class="space-y-6">
+  {% for q in survey.questions %}
+    <div class="border rounded-lg p-4">
+      <p class="font-medium mb-3">{{ loop.index }}. {{ q.text }}</p>
+      {% for opt in q.options_list() %}
+        <label class="flex items-center gap-2 mb-1">
+          <input type="radio" name="q_{{ q.id }}" value="{{ opt }}" required>
+          <span>{{ opt }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    Valider et gagner {{ survey.points_reward }} pts
+  </button>
+</form>
+{% endblock %}

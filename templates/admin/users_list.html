@@ -1,0 +1,38 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Utilisateurs{% endblock %}
+{% block admin_content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Utilisateurs</h1>
+  <form method="get" class="flex gap-2">
+    <input name="q" value="{{ q }}" placeholder="Recherche email" class="border rounded px-3 py-1.5 text-sm">
+    <button class="bg-slate-800 text-white px-3 py-1.5 rounded text-sm">Filtrer</button>
+  </form>
+</div>
+<div class="bg-white border rounded overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-100 text-left">
+      <tr>
+        <th class="p-2">ID</th><th class="p-2">Email</th><th class="p-2">Solde</th>
+        <th class="p-2">Admin</th><th class="p-2">Créé</th><th class="p-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in pagination.items %}
+      <tr class="border-t">
+        <td class="p-2">{{ u.id }}</td>
+        <td class="p-2">{{ u.email }}</td>
+        <td class="p-2">{{ u.points_balance }}</td>
+        <td class="p-2">{{ "✅" if u.is_admin else "—" }}</td>
+        <td class="p-2">{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+        <td class="p-2"><a class="text-indigo-600 hover:underline" href="{{ url_for('admin.user_detail', user_id=u.id) }}">Voir</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="mt-4 flex gap-2 text-sm">
+  {% if pagination.has_prev %}<a class="px-3 py-1 border rounded" href="{{ url_for('admin.users_list', page=pagination.prev_num, q=q) }}">←</a>{% endif %}
+  <span class="px-2 py-1">Page {{ pagination.page }} / {{ pagination.pages or 1 }}</span>
+  {% if pagination.has_next %}<a class="px-3 py-1 border rounded" href="{{ url_for('admin.users_list', page=pagination.next_num, q=q) }}">→</a>{% endif %}
+</div>
+{% endblock %}

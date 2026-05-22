@@ -1,0 +1,61 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Sondage{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-4">{{ "Éditer" if survey else "Nouveau" }} sondage</h1>
+<form method="post" class="space-y-4 bg-white border rounded p-4">
+  <div>
+    <label class="block text-sm font-medium">Titre</label>
+    <input name="title" value="{{ survey.title if survey else '' }}" required class="border rounded w-full px-3 py-2">
+  </div>
+  <div>
+    <label class="block text-sm font-medium">Description</label>
+    <textarea name="description" rows="3" class="border rounded w-full px-3 py-2">{{ survey.description if survey else '' }}</textarea>
+  </div>
+  <div class="flex gap-4">
+    <div>
+      <label class="block text-sm font-medium">Points</label>
+      <input type="number" name="points_reward" value="{{ survey.points_reward if survey else 50 }}" min="1" class="border rounded px-3 py-2 w-32">
+    </div>
+    <label class="flex items-center gap-2 mt-6 text-sm">
+      <input type="checkbox" name="active" {% if not survey or survey.active %}checked{% endif %}> Actif
+    </label>
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between mb-2">
+      <div class="font-semibold">Questions</div>
+      <button type="button" onclick="addQ()" class="text-sm px-2 py-1 border rounded">+ Ajouter</button>
+    </div>
+    <div id="questions" class="space-y-2">
+      {% for q in (survey.questions if survey else []) %}
+      <div class="grid grid-cols-12 gap-2 q-row">
+        <input type="hidden" name="q_id" value="{{ q.id }}">
+        <input name="q_text" value="{{ q.text }}" placeholder="Texte de la question" class="col-span-6 border rounded px-2 py-1.5 text-sm">
+        <input name="q_options" value="{{ q.options }}" placeholder="Options séparées par |" class="col-span-5 border rounded px-2 py-1.5 text-sm">
+        <button type="button" onclick="this.closest('.q-row').remove()" class="col-span-1 text-red-600 text-sm">×</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="pt-2">
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded">Enregistrer</button>
+    <a href="{{ url_for('admin.surveys_list') }}" class="ml-2 text-sm">Annuler</a>
+  </div>
+</form>
+
+<template id="qtpl">
+  <div class="grid grid-cols-12 gap-2 q-row">
+    <input type="hidden" name="q_id" value="">
+    <input name="q_text" placeholder="Texte de la question" class="col-span-6 border rounded px-2 py-1.5 text-sm">
+    <input name="q_options" placeholder="Options séparées par |" class="col-span-5 border rounded px-2 py-1.5 text-sm">
+    <button type="button" onclick="this.closest('.q-row').remove()" class="col-span-1 text-red-600 text-sm">×</button>
+  </div>
+</template>
+<script>
+function addQ(){
+  const tpl = document.getElementById('qtpl');
+  document.getElementById('questions').appendChild(tpl.content.cloneNode(true));
+}
+</script>
+{% endblock %}

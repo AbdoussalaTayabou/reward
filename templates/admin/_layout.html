@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Admin · {% block admin_title %}{% endblock %}{% endblock %}
+
+{% block content %}
+<div class="flex gap-6">
+  <aside class="w-56 shrink-0">
+    <div class="bg-white border rounded p-3 sticky top-4">
+      <div class="text-xs uppercase text-slate-500 mb-2">Admin</div>
+      <nav class="flex flex-col text-sm">
+        <a class="py-1 hover:underline" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.users_list') }}">Utilisateurs</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.surveys_list') }}">Sondages</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.videos_list') }}">Vidéos</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.tasks_list') }}">Tâches</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.tasks_pending') }}">Tâches en attente</a>
+        <a class="py-1 hover:underline" href="{{ url_for('admin.withdrawals_list') }}">Retraits</a>
+      </nav>
+    </div>
+  </aside>
+  <section class="flex-1 min-w-0">
+    {% block admin_content %}{% endblock %}
+  </section>
+</div>
+{% endblock %}

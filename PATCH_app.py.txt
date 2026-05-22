@@ -1,0 +1,16 @@
+"""
+À ajouter dans app.py / create_app() :
+
+    # ---- registry plateformes (Gagner) ----
+    from platforms.routes import platforms_bp
+    from platforms.registry import all_platforms
+    app.register_blueprint(platforms_bp)
+
+    @app.context_processor
+    def inject_platforms():
+        # disponible dans toutes les templates (base.html mega-menu)
+        return {"nav_platforms": all_platforms()}
+
+C'est tout. Le hub est ensuite accessible sur /earn et le mega-menu "Gagner"
+liste automatiquement les plateformes activées dans platforms/registry.py.
+"""

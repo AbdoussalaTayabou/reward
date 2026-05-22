@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Page introuvable — Rewards{% endblock %}
+{% block content %}
+<section class="max-w-xl mx-auto px-4 py-24 text-center">
+  <p class="text-7xl font-extrabold text-brand-600">404</p>
+  <h1 class="mt-4 text-3xl font-bold">Cette page n'existe pas.</h1>
+  <p class="mt-3 text-slate-600">Le lien est peut-être cassé ou la page a été déplacée.</p>
+  <a href="{{ url_for('index') }}" class="mt-6 inline-block bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-lg font-semibold">Retour à l'accueil</a>
+</section>
+{% endblock %}

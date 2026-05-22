@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Historique{% endblock %}
+{% block content %}
+<a href="{{ url_for('dashboard.home') }}" class="text-sm text-slate-500 hover:underline">← Mon espace</a>
+<h1 class="text-2xl font-bold my-4">Historique ({{ total }})</h1>
+
+<div class="bg-white border rounded p-5">
+  <table class="w-full text-sm">
+    <thead class="text-left text-slate-500">
+      <tr><th class="py-1">Date</th><th>Raison</th><th>Réf.</th><th class="text-right">Delta</th></tr>
+    </thead>
+    <tbody>
+      {% for tx in txs %}
+        <tr class="border-t">
+          <td class="py-1.5">{{ tx.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ tx.reason }}</td>
+          <td class="text-slate-400 text-xs">{{ tx.reference or '' }}</td>
+          <td class="text-right font-mono {% if tx.delta > 0 %}text-green-700{% elif tx.delta < 0 %}text-red-700{% else %}text-slate-500{% endif %}">
+            {{ '%+d' % tx.delta }}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="py-3 text-slate-500">Rien à afficher.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="flex justify-between mt-4 text-sm">
+  {% if page > 1 %}
+    <a href="{{ url_for('dashboard.history', page=page-1) }}" class="text-indigo-600 hover:underline">← Précédent</a>
+  {% else %}<span></span>{% endif %}
+  {% if has_next %}
+    <a href="{{ url_for('dashboard.history', page=page+1) }}" class="text-indigo-600 hover:underline">Suivant →</a>
+  {% endif %}
+</div>
+{% endblock %}

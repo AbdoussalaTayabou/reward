@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Contact — Rewards{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-16 grid md:grid-cols-2 gap-12">
+  <div>
+    <span class="text-brand-600 font-semibold text-sm uppercase tracking-wide">Contact</span>
+    <h1 class="mt-2 text-4xl md:text-5xl font-extrabold">Une question ? Écrivez-nous.</h1>
+    <p class="mt-5 text-slate-600">Notre équipe répond en moyenne sous 24 h ouvrées, du lundi au vendredi.</p>
+    <div class="mt-8 space-y-4 text-sm">
+      <div><p class="font-semibold">📧 Email</p><p class="text-slate-600">contact@rewards.app</p></div>
+      <div><p class="font-semibold">💬 Support membres</p><p class="text-slate-600">support@rewards.app</p></div>
+      <div><p class="font-semibold">🤝 Partenariats</p><p class="text-slate-600">partners@rewards.app</p></div>
+    </div>
+  </div>
+
+  <form method="post" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+    <div>
+      <label class="text-sm font-semibold">Nom</label>
+      <input name="name" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+    </div>
+    <div>
+      <label class="text-sm font-semibold">Email</label>
+      <input name="email" type="email" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+    </div>
+    <div>
+      <label class="text-sm font-semibold">Sujet</label>
+      <input name="subject" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+    </div>
+    <div>
+      <label class="text-sm font-semibold">Message</label>
+      <textarea name="message" rows="5" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"></textarea>
+    </div>
+    <button class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-lg">Envoyer le message</button>
+  </form>
+</section>
+{% endblock %}

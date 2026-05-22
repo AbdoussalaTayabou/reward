@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Récompenses disponibles — Rewards{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-16">
+  <span class="text-brand-600 font-semibold text-sm uppercase tracking-wide">Catalogue</span>
+  <h1 class="mt-2 text-4xl md:text-5xl font-extrabold">Échangez vos points contre du réel.</h1>
+  <p class="mt-5 text-lg text-slate-600 max-w-2xl">Plus de 20 partenaires, des cartes cadeaux livrées par email en quelques heures, et des virements PayPal sécurisés.</p>
+
+  <h2 class="mt-12 text-2xl font-extrabold">💸 Argent</h2>
+  <div class="mt-4 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+    {% for n,m in [('PayPal','5 € minimum'),('Virement bancaire','20 € minimum'),('Crypto (BTC/ETH)','10 € minimum')] %}
+    <div class="p-5 border border-slate-200 rounded-xl hover:border-brand-500 transition">
+      <p class="font-bold">{{ n }}</p><p class="text-sm text-slate-500 mt-1">{{ m }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="mt-12 text-2xl font-extrabold">🎁 Cartes cadeaux</h2>
+  <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    {% for n in ['Amazon','Fnac','Decathlon','Carrefour','Sephora','Zalando','Netflix','Spotify','Steam','PlayStation','Xbox','Nintendo','App Store','Google Play','Uber Eats','Deliveroo'] %}
+    <div class="p-4 border border-slate-200 rounded-xl text-center font-semibold text-slate-700 hover:border-brand-500 transition">{{ n }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-12 bg-slate-50 border border-slate-200 rounded-2xl p-8">
+    <h3 class="text-xl font-bold">Délais & frais</h3>
+    <p class="mt-2 text-slate-600">Les retraits sont validés manuellement sous <strong>48 h ouvrées</strong>. Aucun frais de retrait, jamais. Le taux est fixe : <strong>1 000 pts = 1 €</strong>.</p>
+  </div>
+</section>
+{% endblock %}

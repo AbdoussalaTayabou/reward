@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Tâches{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Petites tâches</h1>
+
+<h2 class="text-lg font-semibold mb-3">Disponibles</h2>
+{% if available %}
+  <ul class="space-y-3 mb-8">
+    {% for t in available %}
+      <li class="bg-white border rounded p-4 flex items-center justify-between">
+        <div>
+          <div class="font-medium">{{ t.title }}</div>
+          <div class="text-sm text-slate-600">{{ t.description[:120] }}{% if t.description|length > 120 %}…{% endif %}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-indigo-700 font-semibold">+{{ t.points_reward }} pts</span>
+          <a href="{{ url_for('tasks.do_task', task_id=t.id) }}"
+             class="bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 text-sm">Faire</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-slate-500 mb-8">Aucune tâche disponible pour le moment.</p>
+{% endif %}
+
+{% if done %}
+  <h2 class="text-lg font-semibold mb-3">Déjà validées</h2>
+  <ul class="space-y-2">
+    {% for t in done %}
+      <li class="bg-slate-100 border rounded p-3 text-sm text-slate-600">
+        ✓ {{ t.title }} <span class="text-slate-400">(+{{ t.points_reward }} pts)</span>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Retraits{% endblock %}
+{% block admin_content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Retraits</h1>
+  <div class="text-sm space-x-2">
+    {% for s in ["pending","paid","failed"] %}
+      <a href="{{ url_for('admin.withdrawals_list', status=s) }}"
+         class="px-3 py-1.5 rounded border {% if status==s %}bg-slate-800 text-white{% else %}bg-white{% endif %}">{{ s }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% if not items %}
+  <div class="bg-white border rounded p-6 text-slate-500">Aucun retrait.</div>
+{% else %}
+<div class="bg-white border rounded overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-100 text-left">
+      <tr><th class="p-2">#</th><th class="p-2">User</th><th class="p-2">PayPal</th><th class="p-2">Points</th><th class="p-2">EUR</th><th class="p-2">Statut</th><th class="p-2">Date</th><th class="p-2"></th></tr>
+    </thead>
+    <tbody>
+      {% for w in items %}
+      <tr class="border-t align-top">
+        <td class="p-2">{{ w.id }}</td>
+        <td class="p-2">{{ users.get(w.user_id).email if users.get(w.user_id) else w.user_id }}</td>
+        <td class="p-2">{{ w.paypal_email }}</td>
+        <td class="p-2">{{ w.points_spent }}</td>
+        <td class="p-2">{{ "%.2f"|format(w.amount_eur) }} €</td>
+        <td class="p-2">{{ w.status }}</td>
+        <td class="p-2 text-xs">{{ w.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td class="p-2 text-right">
+          {% if w.status == "pending" %}
+          <form method="post" action="{{ url_for('admin.withdrawal_mark', w_id=w.id) }}" class="flex gap-1 items-center justify-end">
+            <input name="paypal_batch_id" placeholder="batch id (si payé)" class="border rounded px-2 py-1 text-xs">
+            <button name="action" value="paid" class="bg-green-600 text-white px-2 py-1 rounded text-xs">Payé</button>
+            <button name="action" value="failed" class="bg-red-600 text-white px-2 py-1 rounded text-xs"
+                    onclick="return confirm('Rejeter et rembourser ?')">Rejeter</button>
+          </form>
+          {% else %}
+            <span class="text-xs text-slate-500">{{ w.paypal_batch_id or "" }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

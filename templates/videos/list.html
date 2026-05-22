@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Vidéos</h1>
+
+<h2>Disponibles</h2>
+{% if available %}
+  <ul>
+    {% for v in available %}
+      <li>
+        <a href="{{ url_for('videos.watch', video_id=v.id) }}">{{ v.title }}</a>
+        — {{ v.duration_seconds }}s — <strong>+{{ v.points_reward }} pts</strong>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Aucune vidéo disponible pour le moment.</p>
+{% endif %}
+
+{% if completed %}
+  <h2>Déjà regardées</h2>
+  <ul>
+    {% for v in completed %}
+      <li>{{ v.title }} <em>(complétée)</em></li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

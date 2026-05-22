@@ -1,0 +1,29 @@
+{# Mega-menu "Gagner" — inclus depuis base.html.
+   Liste dynamiquement les plateformes activées (registry). #}
+{% from "partials/_macros.html" import nothing with context %}{# noqa #}
+
+{% set _platforms = platforms_nav() %}
+<div class="relative group">
+  <button class="text-slate-700 hover:text-brand-700 inline-flex items-center gap-1">
+    Gagner
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="absolute left-0 top-full pt-2 hidden group-hover:block z-50">
+    <div class="w-[28rem] bg-white border border-slate-200 rounded-xl shadow-xl p-4 grid grid-cols-2 gap-2">
+      {% for p in _platforms %}
+        <a href="{% if p.internal %}{{ url_for(p.endpoint) }}{% else %}{{ url_for('platforms.go', slug=p.slug) }}{% endif %}"
+           class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50">
+          <span class="w-9 h-9 rounded-lg bg-gradient-to-br {{ p.color }} text-white flex items-center justify-center text-lg">{{ p.icon }}</span>
+          <span>
+            <span class="block text-sm font-semibold text-slate-800">{{ p.name }}</span>
+            <span class="block text-xs text-slate-500 line-clamp-1">{{ p.description }}</span>
+          </span>
+        </a>
+      {% endfor %}
+      <a href="{{ url_for('platforms.hub') }}"
+         class="col-span-2 mt-1 text-center text-sm font-semibold text-brand-700 py-2 rounded-lg bg-brand-50 hover:bg-brand-100">
+        Voir tout le hub →
+      </a>
+    </div>
+  </div>
+</div>

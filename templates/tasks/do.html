@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('tasks.list_tasks') }}" class="text-sm text-slate-500 hover:underline">← Retour</a>
+
+<div class="bg-white border rounded p-6 mt-4 max-w-2xl">
+  <h1 class="text-2xl font-bold mb-2">{{ task.title }}</h1>
+  <p class="text-indigo-700 font-semibold mb-4">Récompense : +{{ task.points_reward }} pts</p>
+
+  <div class="prose prose-sm mb-6 whitespace-pre-line text-slate-700">{{ task.description }}</div>
+
+  {% if task.action_url %}
+    <a href="{{ task.action_url }}" target="_blank" rel="noopener"
+       class="inline-block mb-6 bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-900">
+      Ouvrir la mission ↗
+    </a>
+  {% endif %}
+
+  <form method="post" class="space-y-3">
+    <label class="block">
+      <span class="text-sm font-medium">Preuve (URL d'une capture, pseudo utilisé, commentaire…)</span>
+      <textarea name="proof" required minlength="5" rows="3"
+                class="mt-1 w-full border rounded px-3 py-2"
+                placeholder="Ex: https://imgur.com/... ou mon pseudo : alex_92"></textarea>
+    </label>
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+      Valider la tâche
+    </button>
+  </form>
+</div>
+{% endblock %}

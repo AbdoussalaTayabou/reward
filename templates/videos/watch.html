@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ video.title }}</h1>
+
+{# Lecteur : YouTube embed si l'URL contient youtube/youtu.be, sinon <video> HTML5 #}
+{% if 'youtube.com' in video.url or 'youtu.be' in video.url %}
+  <iframe width="640" height="360"
+          src="{{ video.url }}"
+          frameborder="0" allowfullscreen></iframe>
+{% else %}
+  <video width="640" controls>
+    <source src="{{ video.url }}">
+  </video>
+{% endif %}
+
+<p>Durée minimum : <strong>{{ video.duration_seconds }}s</strong> — Récompense : <strong>+{{ video.points_reward }} pts</strong></p>
+
+<form method="post" action="{{ url_for('videos.claim', video_id=video.id) }}">
+  <input type="hidden" name="token" value="{{ token }}">
+  <button id="claim-btn" type="submit" disabled>
+    Patientez <span id="countdown">{{ video.duration_seconds }}</span>s…
+  </button>
+</form>
+
+<p><a href="{{ url_for('videos.list_videos') }}">← Retour aux vidéos</a></p>
+
+<script>
+  // Anti-triche UX : le bouton se débloque après la durée requise.
+  // La VRAIE vérif est côté serveur (recalcul de l'elapsed via le token signé).
+  (function () {
+    var remaining = {{ video.duration_seconds }};
+    var btn = document.getElementById('claim-btn');
+    var cd = document.getElementById('countdown');
+    var timer = setInterval(function () {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(timer);
+        btn.disabled = false;
+        btn.textContent = 'Réclamer mes points (+{{ video.points_reward }})';
+      } else {
+        cd.textContent = remaining;
+      }
+    }, 1000);
+  })();
+</script>
+{% endblock %}

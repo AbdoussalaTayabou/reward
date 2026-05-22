@@ -1,0 +1,57 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Utilisateur #{{ user.id }}{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-4">{{ user.email }}</h1>
+<div class="grid md:grid-cols-2 gap-4 mb-6">
+  <div class="bg-white border rounded p-4">
+    <div class="text-sm text-slate-500">Solde</div>
+    <div class="text-2xl font-semibold">{{ user.points_balance }} pts</div>
+    <div class="text-sm mt-2">Code parrainage : <code>{{ user.referral_code }}</code></div>
+    <div class="text-sm">PayPal : {{ user.paypal_email or "—" }}</div>
+    <div class="text-sm">Parrainages effectués : {{ referrals_made }}</div>
+    <div class="text-sm">Admin : {{ "oui" if user.is_admin else "non" }}</div>
+    <form method="post" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" class="mt-3">
+      <button class="text-sm px-3 py-1.5 border rounded hover:bg-slate-50">Basculer admin</button>
+    </form>
+  </div>
+
+  <div class="bg-white border rounded p-4">
+    <div class="font-semibold mb-2">Ajuster les points</div>
+    <form method="post" action="{{ url_for('admin.adjust_points', user_id=user.id) }}" class="space-y-2">
+      <input type="number" name="delta" placeholder="ex: -100 ou 500" class="border rounded px-3 py-1.5 w-full text-sm" required>
+      <input type="text" name="reason" placeholder="Motif" class="border rounded px-3 py-1.5 w-full text-sm">
+      <button class="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm">Appliquer</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4">
+  <div class="bg-white border rounded p-4">
+    <div class="font-semibold mb-2">Transactions (100 dernières)</div>
+    <table class="w-full text-xs">
+      <thead><tr class="text-left text-slate-500"><th>Δ</th><th>Motif</th><th>Réf.</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for t in txs %}
+        <tr class="border-t">
+          <td class="py-1 {% if t.delta>0 %}text-green-700{% elif t.delta<0 %}text-red-700{% endif %}">{{ t.delta }}</td>
+          <td>{{ t.reason }}</td>
+          <td class="truncate max-w-[160px]">{{ t.reference or "" }}</td>
+          <td>{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="bg-white border rounded p-4">
+    <div class="font-semibold mb-2">Completions</div>
+    <table class="w-full text-xs">
+      <thead><tr class="text-left text-slate-500"><th>Type</th><th>Item</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for c in completions %}
+        <tr class="border-t"><td class="py-1">{{ c.item_type }}</td><td>{{ c.item_id }}</td><td>{{ c.completed_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

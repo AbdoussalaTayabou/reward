@@ -1,0 +1,33 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Tâches en attente{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-4">Tâches en attente de validation</h1>
+{% if not rows %}
+  <div class="bg-white border rounded p-6 text-slate-500">Aucune soumission en attente.</div>
+{% else %}
+<div class="bg-white border rounded overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-100 text-left"><tr><th class="p-2">#</th><th class="p-2">User</th><th class="p-2">Tâche</th><th class="p-2">Preuve</th><th class="p-2">Date</th><th class="p-2"></th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="border-t align-top">
+        <td class="p-2">{{ r.pt.id }}</td>
+        <td class="p-2">{{ r.user.email if r.user else "?" }}</td>
+        <td class="p-2">{{ r.task.title if r.task else "(supprimée)" }}<br><span class="text-xs text-slate-500">{{ r.task.points_reward if r.task else 0 }} pts</span></td>
+        <td class="p-2 max-w-[320px] break-words">{{ r.proof }}</td>
+        <td class="p-2 text-xs">{{ r.pt.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td class="p-2 text-right space-x-1">
+          <form method="post" action="{{ url_for('admin.task_pending_approve', pt_id=r.pt.id) }}" class="inline">
+            <button class="bg-green-600 text-white px-2 py-1 rounded text-xs">Valider</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.task_pending_reject', pt_id=r.pt.id) }}" class="inline">
+            <button class="bg-red-600 text-white px-2 py-1 rounded text-xs">Rejeter</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

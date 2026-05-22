@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Rewards — Gagne de l'argent en ligne, simplement{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
+  <div class="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-semibold">
+        ⭐ Plus de 12 000 membres actifs
+      </span>
+      <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
+        Transformez votre <span class="text-brand-600">temps libre</span> en récompenses réelles.
+      </h1>
+      <p class="mt-5 text-lg text-slate-600 max-w-xl">
+        Sondages rémunérés, vidéos sponsorisées, micro-tâches et offres partenaires : gagnez des points
+        échangeables contre du <strong>PayPal</strong>, des <strong>cartes Amazon</strong>, Steam, Netflix, et bien plus.
+      </p>
+      <div class="mt-7 flex flex-col sm:flex-row gap-3">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard.home') }}" class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-lg font-semibold text-center shadow">Aller à mon espace</a>
+        {% else %}
+          <a href="{{ url_for('auth.signup') }}" class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-lg font-semibold text-center shadow">Créer un compte gratuit</a>
+        {% endif %}
+        <a href="{{ url_for('pages.how_it_works') }}" class="border border-slate-300 hover:border-brand-500 hover:text-brand-700 px-6 py-3 rounded-lg font-semibold text-center">Voir comment ça marche</a>
+      </div>
+      <div class="mt-6 flex items-center gap-5 text-sm text-slate-500">
+        <div class="flex items-center gap-1.5">✅ 100 % gratuit</div>
+        <div class="flex items-center gap-1.5">⚡ Retrait dès 5 €</div>
+        <div class="flex items-center gap-1.5">🔒 Données protégées</div>
+      </div>
+    </div>
+
+    <div class="relative">
+      <div class="absolute -inset-6 bg-gradient-to-tr from-brand-200/40 to-pink-200/40 rounded-3xl blur-2xl"></div>
+      <div class="relative bg-white border border-slate-200 rounded-2xl shadow-xl p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-500">Solde</p>
+            <p class="text-3xl font-extrabold">12 480 <span class="text-base text-slate-500">pts</span></p>
+            <p class="text-xs text-green-600 font-semibold mt-0.5">≈ 12,48 €</p>
+          </div>
+          <button class="bg-brand-600 text-white text-sm px-3 py-2 rounded-lg font-semibold">Retirer</button>
+        </div>
+        <div class="mt-5 space-y-3">
+          {% for t,p in [('Sondage : habitudes shopping', 50),('Vidéo sponsorisée Netflix', 30),('Tâche : avis Google', 100),('Filleul inscrit 🎉', 500)] %}
+          <div class="flex items-center justify-between text-sm border border-slate-100 rounded-lg px-3 py-2">
+            <span class="text-slate-700">{{ t }}</span>
+            <span class="text-green-600 font-semibold">+{{ p }} pts</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<section class="border-y border-slate-100 bg-slate-50">
+  <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+    {% for k,v in [('12 000+','Membres actifs'),('320 000 €','Reversés en 2024'),('48 h','Délai de paiement moyen'),('4,7/5','Note moyenne')] %}
+    <div>
+      <p class="text-2xl font-extrabold text-slate-900">{{ k }}</p>
+      <p class="text-xs text-slate-500 uppercase tracking-wide">{{ v }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FEATURES / EARNING METHODS -->
+<section class="max-w-6xl mx-auto px-4 py-16">
+  <div class="text-center max-w-2xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Plusieurs façons de gagner</h2>
+    <p class="mt-3 text-slate-600">Choisissez ce qui vous plaît. Nos partenaires nous rémunèrent — nous reversons jusqu'à 90 % à nos membres.</p>
+  </div>
+  <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for icon,t,d in [
+      ('📋','Sondages rémunérés','Donnez votre avis sur des marques : 20 à 500 pts par sondage, 2 à 15 minutes.'),
+      ('🎬','Vidéos sponsorisées','Regardez de courtes vidéos publicitaires et touchez des points instantanément.'),
+      ('✅','Micro-tâches','Suivez un compte, testez une app, laissez un avis : tâches simples vérifiées manuellement.'),
+      ('🎯','Offerwall partenaire','Découvrez des dizaines d\'offres premium via notre partenaire TimeWall.'),
+      ('👥','Parrainage','Invitez vos amis : 500 pts pour vous + 500 pts pour eux dès leur premier gain.'),
+      ('🎁','Bonus quotidiens','Connexion quotidienne, défis, événements limités pour booster votre solde.'),
+    ] %}
+    <div class="p-6 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-lg transition">
+      <div class="text-3xl">{{ icon }}</div>
+      <h3 class="mt-3 font-bold text-lg">{{ t }}</h3>
+      <p class="mt-2 text-sm text-slate-600">{{ d }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="bg-slate-50">
+  <div class="max-w-6xl mx-auto px-4 py-16">
+    <div class="text-center max-w-2xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-extrabold">Commencez en 3 étapes</h2>
+      <p class="mt-3 text-slate-600">Inscription en moins d'une minute, sans carte bancaire.</p>
+    </div>
+    <div class="mt-12 grid md:grid-cols-3 gap-6">
+      {% for n,t,d in [('1','Créez votre compte','Email + mot de passe. C\'est tout.'),('2','Gagnez des points','Sondages, vidéos, tâches ou offerwall — à votre rythme.'),('3','Retirez vos gains','PayPal ou cartes cadeaux dès 5 €, validé sous 48 h.')] %}
+      <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <div class="w-10 h-10 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center">{{ n }}</div>
+        <h3 class="mt-4 font-bold text-lg">{{ t }}</h3>
+        <p class="mt-2 text-sm text-slate-600">{{ d }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- REWARDS -->
+<section class="max-w-6xl mx-auto px-4 py-16">
+  <div class="text-center max-w-2xl mx-auto">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Échangez vos points</h2>
+    <p class="mt-3 text-slate-600">Plus de 20 partenaires. Retrait dès 5 €.</p>
+  </div>
+  <div class="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+    {% for r in ['PayPal','Amazon','Steam','Netflix','Spotify','Fortnite','Google Play','App Store','Carrefour','Fnac','Decathlon','Visa'] %}
+    <div class="aspect-square flex items-center justify-center bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:border-brand-500 transition">{{ r }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="bg-slate-50">
+  <div class="max-w-6xl mx-auto px-4 py-16">
+    <div class="text-center"><h2 class="text-3xl md:text-4xl font-extrabold">Ils ont déjà été payés</h2></div>
+    <div class="mt-10 grid md:grid-cols-3 gap-6">
+      {% for n,c,t in [('Sarah, 23 ans','Étudiante à Lyon','J\'ai retiré 45 € sur PayPal en 3 semaines, juste en faisant les sondages dans le métro.'),('Karim, 31 ans','Freelance','Le système de parrainage est top. J\'ai invité 6 amis, ça paie un abonnement Netflix tous les mois.'),('Laura, 27 ans','Maman au foyer','Sérieux, simple, et surtout payé sans embrouille. Ça change des autres sites.')] %}
+      <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <div class="flex text-yellow-400">★★★★★</div>
+        <p class="mt-3 text-slate-700">« {{ t }} »</p>
+        <div class="mt-4 text-sm"><p class="font-semibold">{{ n }}</p><p class="text-slate-500">{{ c }}</p></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="max-w-6xl mx-auto px-4 py-16">
+  <div class="bg-gradient-to-r from-brand-600 to-brand-800 rounded-3xl p-10 md:p-14 text-center text-white shadow-xl">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Prêt à gagner vos premiers euros ?</h2>
+    <p class="mt-3 text-brand-100 max-w-xl mx-auto">Inscrivez-vous maintenant et recevez <strong>100 pts de bienvenue</strong>. Sans engagement, supprimable à tout moment.</p>
+    <div class="mt-6">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard.home') }}" class="inline-block bg-white text-brand-700 px-7 py-3 rounded-lg font-bold hover:bg-brand-50">Mon espace</a>
+      {% else %}
+        <a href="{{ url_for('auth.signup') }}" class="inline-block bg-white text-brand-700 px-7 py-3 rounded-lg font-bold hover:bg-brand-50">Créer mon compte gratuit</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

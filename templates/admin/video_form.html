@@ -1,0 +1,32 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Vidéo{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-4">{{ "Éditer" if video else "Nouvelle" }} vidéo</h1>
+<form method="post" class="space-y-4 bg-white border rounded p-4">
+  <div>
+    <label class="block text-sm font-medium">Titre</label>
+    <input name="title" value="{{ video.title if video else '' }}" required class="border rounded w-full px-3 py-2">
+  </div>
+  <div>
+    <label class="block text-sm font-medium">URL (embed YouTube ou .mp4)</label>
+    <input name="url" value="{{ video.url if video else '' }}" required class="border rounded w-full px-3 py-2">
+  </div>
+  <div class="flex gap-4">
+    <div>
+      <label class="block text-sm font-medium">Durée min. (s)</label>
+      <input type="number" name="duration_seconds" value="{{ video.duration_seconds if video else 30 }}" min="1" class="border rounded px-3 py-2 w-32">
+    </div>
+    <div>
+      <label class="block text-sm font-medium">Points</label>
+      <input type="number" name="points_reward" value="{{ video.points_reward if video else 20 }}" min="1" class="border rounded px-3 py-2 w-32">
+    </div>
+    <label class="flex items-center gap-2 mt-6 text-sm">
+      <input type="checkbox" name="active" {% if not video or video.active %}checked{% endif %}> Actif
+    </label>
+  </div>
+  <div class="pt-2">
+    <button class="bg-indigo-600 text-white px-4 py-2 rounded">Enregistrer</button>
+    <a href="{{ url_for('admin.videos_list') }}" class="ml-2 text-sm">Annuler</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}Dashboard{% endblock %}
+{% block admin_content %}
+<h1 class="text-2xl font-bold mb-6">Dashboard admin</h1>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+  {% set tiles = [
+    ("Utilisateurs", stats.users_total),
+    ("Nouveaux (7j)", stats.users_7d),
+    ("Points crédités (total)", stats.points_credited),
+    ("Solde total en circulation", stats.points_balance_total),
+    ("Completions", stats.completions_total),
+    ("Parrainages", stats.referrals_total),
+    ("Retraits en attente", stats.withdrawals_pending),
+    ("Retraits payés", stats.withdrawals_paid),
+    ("Tâches en attente", stats.tasks_pending),
+    ("Sondages actifs", stats.surveys_active),
+    ("Vidéos actives", stats.videos_active),
+    ("Tâches actives", stats.tasks_active),
+  ] %}
+  {% for label, value in tiles %}
+    <div class="bg-white border rounded p-4">
+      <div class="text-xs uppercase text-slate-500">{{ label }}</div>
+      <div class="text-2xl font-semibold mt-1">{{ value }}</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
