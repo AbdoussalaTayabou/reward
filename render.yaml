@@ -1,0 +1,58 @@
+databases:
+  - name: rewards-db
+    databaseName: rewards
+    user: rewards_user
+    plan: free          # passe à "starter" (7 $/mois) dès que tu veux de la persistance garantie
+
+services:
+  - type: web
+    name: rewards-app
+    runtime: python
+    plan: free          # "starter" recommandé en production réelle
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --workers 2 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    autoDeploy: true    # redéploiement automatique à chaque push sur la branche principale
+
+    envVars:
+      # Flask
+      - key: SECRET_KEY
+        generateValue: true           # Render génère une valeur aléatoire sécurisée
+
+      # Base de données : Render injecte automatiquement DATABASE_URL depuis le service ci-dessus
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rewards-db
+          property: connectionString
+
+      # Points / règles métier
+      - key: POINTS_PER_EUR
+        value: "1000"
+      - key: MIN_WITHDRAW_EUR
+        value: "5"
+      - key: REFERRAL_BONUS_POINTS
+        value: "500"
+
+      # PayPal — à renseigner dans le dashboard Render (Environment > Add variable)
+      - key: PAYPAL_MODE
+        value: sandbox                # passe à "live" en prod
+      - key: PAYPAL_CLIENT_ID
+        value: ""
+      - key: PAYPAL_CLIENT_SECRET
+        value: ""
+
+      # TimeWall — à renseigner dans le dashboard Render
+      - key: TIMEWALL_APP_KEY
+        value: ""
+      - key: TIMEWALL_SECRET
+        value: ""
+      - key: TIMEWALL_HASH_ALGO
+        value: sha256
+      - key: TIMEWALL_ALLOWED_IPS
+        value: ""
+
+      # Python / Flask
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: FLASK_ENV
+        value: production

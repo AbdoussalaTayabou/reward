@@ -32,7 +32,7 @@ PLATFORMS = [
         "icon": "📝",
         "enabled": True,
         "internal": True,
-        "endpoint": "surveys.list",   # url_for()
+        "endpoint": "surveys.list_surveys",   # url_for()
     },
     {
         "slug": "videos",
@@ -43,7 +43,7 @@ PLATFORMS = [
         "icon": "🎬",
         "enabled": True,
         "internal": True,
-        "endpoint": "videos.list",
+        "endpoint": "videos.list_videos",
     },
     {
         "slug": "tasks",
@@ -54,7 +54,7 @@ PLATFORMS = [
         "icon": "✅",
         "enabled": True,
         "internal": True,
-        "endpoint": "tasks.list",
+        "endpoint": "tasks.list_tasks",
     },
 
     # --- Plateformes externes (offerwalls / régies) -----------------------

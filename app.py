@@ -1,42 +1,88 @@
 import os
-from flask import Flask, render_template
+import threading
+import time
+import requests as http_requests
+from flask import Flask, render_template, jsonify
 from flask_login import current_user
 from sqlalchemy import inspect, text
 from dotenv import load_dotenv
 
- # ---- registry plateformes (Gagner) ----
 from platforms.routes import platforms_bp
 from platforms.registry import all_platforms
-
 from extensions import db, login_manager
 from models import User
 
 
+def _fix_postgres_url(url: str) -> str:
+    """Render fournit postgres://, SQLAlchemy 1.4+ exige postgresql://"""
+    if url and url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+
 def _ensure_schema():
-    """Petite migration légère pour SQLite/Postgres : ajoute les colonnes
-    manquantes qu'on a introduites après coup (ex: users.is_admin)."""
+    """Migration légère : ajoute les colonnes introduites après coup."""
     insp = inspect(db.engine)
-    if "users" in insp.get_table_names():
+    tables = insp.get_table_names()
+    if "users" in tables:
         cols = {c["name"] for c in insp.get_columns("users")}
         if "is_admin" not in cols:
             with db.engine.begin() as conn:
                 conn.execute(text(
-                    "ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0"
+                    "ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT FALSE"
                 ))
+
+
+def _start_self_ping(app_url: str):
+    """
+    Thread daemon qui ping /health toutes les 10 minutes.
+    Backup au cas où UptimeRobot serait coupé — ne remplace pas UptimeRobot.
+    """
+    def ping_loop():
+        time.sleep(30)  # Attend que l'app soit bien levée
+        while True:
+            try:
+                http_requests.get(f"{app_url}/health", timeout=10)
+            except Exception:
+                pass  # silencieux — UptimeRobot alerte si l'app est vraiment morte
+            time.sleep(600)  # ping toutes les 10 minutes
+
+    t = threading.Thread(target=ping_loop, daemon=True)
+    t.start()
 
 
 def create_app() -> Flask:
     load_dotenv()
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///rewards.db")
+    # ------------------------------------------------------------------ #
+    # Config
+    # ------------------------------------------------------------------ #
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
+
+    raw_db_url = os.getenv("DATABASE_URL", "sqlite:///rewards.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = _fix_postgres_url(raw_db_url)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    app.config["POINTS_PER_EUR"] = int(os.getenv("POINTS_PER_EUR", "1000"))
-    app.config["MIN_WITHDRAW_EUR"] = float(os.getenv("MIN_WITHDRAW_EUR", "5"))
-    app.config["REFERRAL_BONUS_POINTS"] = int(os.getenv("REFERRAL_BONUS_POINTS", "500"))
+    if not app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "pool_pre_ping": True,
+            "pool_recycle": 300,
+            "pool_size": 5,
+            "max_overflow": 2,
+        }
 
+    app.config["POINTS_PER_EUR"]         = int(os.getenv("POINTS_PER_EUR", "1000"))
+    app.config["MIN_WITHDRAW_EUR"]       = float(os.getenv("MIN_WITHDRAW_EUR", "5"))
+    app.config["REFERRAL_BONUS_POINTS"]  = int(os.getenv("REFERRAL_BONUS_POINTS", "500"))
+    app.config["TIMEWALL_APP_KEY"]       = os.getenv("TIMEWALL_APP_KEY", "")
+    app.config["TIMEWALL_SECRET"]        = os.getenv("TIMEWALL_SECRET", "")
+    app.config["TIMEWALL_HASH_ALGO"]     = os.getenv("TIMEWALL_HASH_ALGO", "sha256")
+    app.config["TIMEWALL_ALLOWED_IPS"]   = os.getenv("TIMEWALL_ALLOWED_IPS", "")
+
+    # ------------------------------------------------------------------ #
+    # Extensions
+    # ------------------------------------------------------------------ #
     db.init_app(app)
     login_manager.init_app(app)
 
@@ -44,39 +90,53 @@ def create_app() -> Flask:
     def load_user(user_id: str):
         return db.session.get(User, int(user_id))
 
-    # Config TimeWall
-    app.config["TIMEWALL_APP_KEY"] = os.getenv("TIMEWALL_APP_KEY", "")
-    app.config["TIMEWALL_SECRET"] = os.getenv("TIMEWALL_SECRET", "")
-    app.config["TIMEWALL_HASH_ALGO"] = os.getenv("TIMEWALL_HASH_ALGO", "sha256")
-    app.config["TIMEWALL_ALLOWED_IPS"] = os.getenv("TIMEWALL_ALLOWED_IPS", "")
-
+    # ------------------------------------------------------------------ #
+    # Blueprints
+    # ------------------------------------------------------------------ #
     from timewall.models import TimewallPostback  # noqa: F401
 
-    # Blueprints
-    from auth.routes import auth_bp
-    from surveys.routes import surveys_bp
-    from videos.routes import videos_bp
-    from tasks.routes import tasks_bp
+    from auth.routes      import auth_bp
+    from surveys.routes   import surveys_bp
+    from videos.routes    import videos_bp
+    from tasks.routes     import tasks_bp
     from dashboard.routes import dashboard_bp
-    from timewall.routes import timewall_bp
-    from admin.routes import admin_bp
-    from pages.routes import pages_bp  # NEW : pages marketing
+    from timewall.routes  import timewall_bp
+    from admin.routes     import admin_bp
+    from pages.routes     import pages_bp
 
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(surveys_bp, url_prefix="/surveys")
-    app.register_blueprint(videos_bp, url_prefix="/videos")
-    app.register_blueprint(tasks_bp, url_prefix="/tasks")
+    app.register_blueprint(auth_bp,      url_prefix="/auth")
+    app.register_blueprint(surveys_bp,   url_prefix="/surveys")
+    app.register_blueprint(videos_bp,    url_prefix="/videos")
+    app.register_blueprint(tasks_bp,     url_prefix="/tasks")
     app.register_blueprint(dashboard_bp, url_prefix="/me")
-    app.register_blueprint(timewall_bp, url_prefix="/timewall")
-    app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(timewall_bp,  url_prefix="/timewall")
+    app.register_blueprint(admin_bp,     url_prefix="/admin")
     app.register_blueprint(pages_bp)
-    app.register_blueprint(platforms_bp)  # /p/about, /p/faq, ...
+    app.register_blueprint(platforms_bp)
 
+    # ------------------------------------------------------------------ #
+    # Route santé — utilisée par UptimeRobot + self-ping
+    # ------------------------------------------------------------------ #
+    @app.route("/health")
+    def health():
+        try:
+            db.session.execute(text("SELECT 1"))
+            db_ok = True
+        except Exception:
+            db_ok = False
+        status = "ok" if db_ok else "degraded"
+        return jsonify({"status": status, "db": db_ok}), 200 if db_ok else 503
+
+    # ------------------------------------------------------------------ #
+    # Route racine
+    # ------------------------------------------------------------------ #
     @app.route("/")
     def index():
         return render_template("index.html", user=current_user)
 
-    # Pages d'erreur soignées
+    # ------------------------------------------------------------------ #
+    # Gestionnaires d'erreurs
+    # ------------------------------------------------------------------ #
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
@@ -85,23 +145,31 @@ def create_app() -> Flask:
     def server_error(e):
         return render_template("errors/500.html"), 500
 
-    # ---------- CLI ----------
+    # ------------------------------------------------------------------ #
+    # Context processors
+    # ------------------------------------------------------------------ #
+    @app.context_processor
+    def inject_platforms():
+        return {"nav_platforms": all_platforms()}
+
+    # ------------------------------------------------------------------ #
+    # CLI
+    # ------------------------------------------------------------------ #
     @app.cli.command("seed-surveys")
     def seed_surveys():
         from models import Survey, SurveyQuestion
         if Survey.query.first():
             print("Sondages déjà présents.")
             return
-        s = Survey(title="Tes habitudes en ligne",
-                   description="Petit sondage rapide (3 questions).",
-                   points_reward=50)
+        s = Survey(
+            title="Tes habitudes en ligne",
+            description="Petit sondage rapide (3 questions).",
+            points_reward=50,
+        )
         s.questions = [
-            SurveyQuestion(text="Combien d'heures passes-tu en ligne par jour ?",
-                           options="0-2|2-5|5-8|8+"),
-            SurveyQuestion(text="Quel réseau social utilises-tu le plus ?",
-                           options="Instagram|TikTok|YouTube|X|Aucun"),
-            SurveyQuestion(text="Préfères-tu les vidéos courtes ou longues ?",
-                           options="Courtes|Longues|Les deux"),
+            SurveyQuestion(text="Combien d'heures passes-tu en ligne par jour ?", options="0-2|2-5|5-8|8+"),
+            SurveyQuestion(text="Quel réseau social utilises-tu le plus ?", options="Instagram|TikTok|YouTube|X|Aucun"),
+            SurveyQuestion(text="Préfères-tu les vidéos courtes ou longues ?", options="Courtes|Longues|Les deux"),
         ]
         db.session.add(s)
         db.session.commit()
@@ -114,12 +182,8 @@ def create_app() -> Flask:
             print("Vidéos déjà présentes.")
             return
         demos = [
-            Video(title="Démo courte (YouTube)",
-                  url="https://www.youtube.com/embed/dQw4w9WgXcQ",
-                  duration_seconds=15, points_reward=20),
-            Video(title="Démo Big Buck Bunny (mp4)",
-                  url="https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4",
-                  duration_seconds=20, points_reward=30),
+            Video(title="Démo courte (YouTube)", url="https://www.youtube.com/embed/dQw4w9WgXcQ", duration_seconds=15, points_reward=20),
+            Video(title="Démo Big Buck Bunny (mp4)", url="https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4", duration_seconds=20, points_reward=30),
         ]
         db.session.add_all(demos)
         db.session.commit()
@@ -132,33 +196,16 @@ def create_app() -> Flask:
             print("Tâches déjà présentes.")
             return
         demos = [
-            Task(title="Suivre notre compte Instagram",
-                 description="1) Ouvre le lien.\n2) Clique sur « Suivre ».\n3) Reviens ici et colle ton pseudo Instagram comme preuve.",
-                 action_url="https://instagram.com",
-                 points_reward=30),
-            Task(title="Tester une app mobile",
-                 description="Installe l'app via le lien, ouvre-la une fois, puis colle une capture d'écran (URL imgur) comme preuve.",
-                 action_url="https://example.com/app",
-                 points_reward=100),
-            Task(title="Donner ton avis (sans lien)",
-                 description="Écris en 2-3 phrases ce que tu penses de cette plateforme. Ta réponse est la preuve.",
-                 action_url=None,
-                 points_reward=20),
+            Task(title="Suivre notre compte Instagram", description="1) Ouvre le lien.\n2) Clique sur « Suivre ».\n3) Colle ton pseudo Instagram comme preuve.", action_url="https://instagram.com", points_reward=30),
+            Task(title="Tester une app mobile", description="Installe l'app via le lien, ouvre-la une fois, puis colle une capture (URL imgur) comme preuve.", action_url="https://example.com/app", points_reward=100),
+            Task(title="Donner ton avis (sans lien)", description="Écris en 2-3 phrases ce que tu penses de cette plateforme. Ta réponse est la preuve.", action_url=None, points_reward=20),
         ]
         db.session.add_all(demos)
         db.session.commit()
         print(f"{len(demos)} tâches de démo créées.")
 
-       
-
-    @app.context_processor
-    def inject_platforms():
-        # disponible dans toutes les templates (base.html mega-menu)
-        return {"nav_platforms": all_platforms()}
-
     @app.cli.command("create-admin")
     def create_admin():
-        """Crée (ou promeut) un admin. Demande email + mot de passe en interactif."""
         import getpass
         email = input("Email admin : ").strip().lower()
         if not email:
@@ -180,12 +227,20 @@ def create_app() -> Flask:
         db.session.commit()
         print(f"Admin créé : {email}")
 
+    # ------------------------------------------------------------------ #
+    # Init BDD + self-ping (production uniquement)
+    # ------------------------------------------------------------------ #
     with app.app_context():
         db.create_all()
         _ensure_schema()
+
+    # RENDER_EXTERNAL_URL est injecté automatiquement par Render (ex: https://rewards-app.onrender.com)
+    app_url = os.getenv("RENDER_EXTERNAL_URL", "")
+    if app_url:
+        _start_self_ping(app_url)
 
     return app
 
 
 if __name__ == "__main__":
-    create_app().run(debug=True)
+    create_app().run(debug=False)
