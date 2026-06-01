@@ -14,7 +14,7 @@ import os
 from urllib.parse import urlencode
 
 from flask import (
-    Blueprint, abort, current_app, redirect, render_template, request, url_for
+    Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 )
 from flask_login import current_user, login_required
 
@@ -33,6 +33,15 @@ platforms_bp = Blueprint("platforms", __name__, url_prefix="/earn")
 # ---------------------------------------------------------------------------
 @platforms_bp.route("/")
 def hub():
+    message_id = request.args.get("message_id", "")
+    if message_id:
+        # CPX envoie des message_id comme :
+        # success_complete, success_screenout, error_quality, etc.
+        if message_id.startswith("success"):
+            flash("Sondage terminé ! Tes points seront crédités sous peu.", "success")
+        else:
+            flash("Ce sondage ne correspondait pas à ton profil. Essaies-en un autre !", "info")
+
     return render_template(
         "earn/hub.html",
         categories=by_category(),
@@ -59,6 +68,24 @@ def go(slug):
                 "Plateforme %s : variable %s non configurée", slug, env_name
             )
         ctx[key] = val
+
+    if slug == "cpx-research":
+        import hashlib
+        from flask import url_for as _url_for
+        app_id = ctx.get("app_id", "")
+        user_id = str(current_user.id)
+        cpx_secret = os.environ.get("CPX_RESEARCH_SECRET", "")
+        secure_hash = hashlib.md5(f"{app_id}{user_id}{cpx_secret}".encode()).hexdigest()
+        redirect_back = _url_for("platforms.hub", _external=True)
+        url = (
+            f"https://offers.cpx-research.com/index.php"
+            f"?app_id={app_id}"
+            f"&ext_user_id={user_id}"
+            f"&secure_hash={secure_hash}"
+            f"&subid_1=rewards"
+            f"&output_method=redirect"
+            f"&callback={redirect_back}?message_id={{message_id}}"
+        )
 
     try:
         url = p["redirect_url"].format(**ctx)
