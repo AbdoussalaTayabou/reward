@@ -50,6 +50,24 @@ def _start_self_ping(app_url: str):
     t = threading.Thread(target=ping_loop, daemon=True)
     t.start()
 
+def _auto_create_admin():
+    """Crée un admin automatiquement si ADMIN_EMAIL et ADMIN_PASSWORD sont définis."""
+    from models import User
+    email = os.getenv("ADMIN_EMAIL", "").strip().lower()
+    password = os.getenv("ADMIN_PASSWORD", "").strip()
+    if not email or not password:
+        return
+    existing = User.query.filter_by(email=email).first()
+    if existing:
+        if not existing.is_admin:
+            existing.is_admin = True
+            db.session.commit()
+        return
+    user = User(email=email, is_admin=True)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+
 
 def create_app() -> Flask:
     load_dotenv()
@@ -233,6 +251,8 @@ def create_app() -> Flask:
     with app.app_context():
         db.create_all()
         _ensure_schema()
+        # ← AJOUTE CES LIGNES
+        _auto_create_admin()
 
     # RENDER_EXTERNAL_URL est injecté automatiquement par Render (ex: https://rewards-app.onrender.com)
     app_url = os.getenv("RENDER_EXTERNAL_URL", "")
