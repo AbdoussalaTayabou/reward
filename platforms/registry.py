@@ -66,7 +66,7 @@ PLATFORMS = [
         "description": "Des centaines de sondages internationaux à forte rémunération.",
         "color": "from-blue-500 to-blue-700",
         "icon": "🌍",
-        "enabled": False,
+        "enabled": True,
         "internal": False,
         "redirect_url": "https://offers.cpx-research.com/index.php?app_id={app_id}&ext_user_id={user_id}",
         "postback_secret_env": "CPX_RESEARCH_SECRET",

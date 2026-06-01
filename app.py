@@ -7,6 +7,10 @@ from flask_login import current_user
 from sqlalchemy import inspect, text
 from dotenv import load_dotenv
 
+# Dans create_app(), avec les autres blueprints
+from cpx.routes import cpx_bp
+
+
 from platforms.routes import platforms_bp
 from platforms.registry import all_platforms
 from extensions import db, login_manager
@@ -131,6 +135,7 @@ def create_app() -> Flask:
     app.register_blueprint(admin_bp,     url_prefix="/admin")
     app.register_blueprint(pages_bp)
     app.register_blueprint(platforms_bp)
+    app.register_blueprint(cpx_bp)
 
     # ------------------------------------------------------------------ #
     # Route santé — utilisée par UptimeRobot + self-ping
